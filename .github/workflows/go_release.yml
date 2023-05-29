@@ -1,18 +1,20 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: GoRelease
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags: "*"
+  schedule:
+    - cron:  '0 0 1 * *'  # at start of every month - is workaround for 90-day artifact lifetime
 
 jobs:
 
   build_arm64:
     runs-on: ubuntu-latest
+    env:
+        BIN_NAME: ncglpm_arm64
     steps:
     - uses: actions/checkout@v3
 
@@ -22,13 +24,21 @@ jobs:
         go-version: 1.19
 
     - name: Build ARM64
-      run: env GOOS=linux GOARCH=arm64 go build -v -o ncglpm_${arch}
+      run: env GOOS=linux GOARCH=arm64 go build -v -o $BIN_NAME
 
     - name: Test
       run: go test -v ./...
 
+    - name: Upload ARM64
+      uses: actions/upload-artifact@v3
+      with:
+        name: $BIN_NAME
+        path: $BIN_NAME
+
   build_amd64:
     runs-on: ubuntu-latest
+    env:
+        BIN_NAME: ncglpm_amd64
     steps:
     - uses: actions/checkout@v3
 
@@ -38,9 +48,15 @@ jobs:
         go-version: 1.19
 
     - name: Build AMD64
-      run: env GOOS=linux GOARCH=amd64 go build -v -o ncglpm_${arch}
+      run: env GOOS=linux GOARCH=amd64 go build -v -o $BIN_NAME
 
     - name: Test
       run: go test -v ./...
+
+    - name: Upload AMD64
+      uses: actions/upload-artifact@v3
+      with:
+        name: $BIN_NAME
+        path: $BIN_NAME
 
     
