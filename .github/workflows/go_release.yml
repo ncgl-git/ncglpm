@@ -33,7 +33,7 @@ jobs:
 
     - name: version
       # description: cobra --version flags print binary name in front of version, i.e. "ncglpm binary v0.0.1"b - we need to only grab last fragment
-      run: echo "$(./${BIN_NAME} --version)" | awk '{print $NF}' >> $GITHUB_STATE
+      run: echo "$(./${BIN_NAME} --version)" | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
       id: version
 
     - name: release
@@ -82,7 +82,7 @@ jobs:
 
     - name: version
       # description: cobra --version flags print binary name in front of version, i.e. "ncglpm binary v0.0.1"b - we need to only grab last fragment
-      run: echo "$(./${BIN_NAME} --version)" | awk '{print $NF}' >> $GITHUB_STATE
+      run: echo "$(./${BIN_NAME} --version)" | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
       id: version
 
     - name: release
