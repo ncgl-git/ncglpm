@@ -6,56 +6,8 @@ on:
 
 jobs:
 
-  build_arm64:
-    runs-on: ubuntu-latest
-    env:
-        BIN_NAME: ncglpm_arm64
-        BIN_NAME_ZIPPED : ncglpm_arm64.zip
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.19
-
-    - name: Test
-      run: go test -v ./...
-
-    - name: Build ARM64
-      run: env GOOS=linux GOARCH=arm64 go build -v -o $BIN_NAME
-
-    - name: Zip
-      run: zip $BIN_NAME_ZIPPED $BIN_NAME
-
-    - name: version
-      # description: cobra --version flags print binary name in front of version, i.e. "ncglpm binary v0.0.1"b - we need to only grab last fragment
-      run: ./ncglpm_arm64 --version | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
-      id: version
-
-    - name: release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}
-        body_path: CHANGELOG.md
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-
-    - name: upload artifact
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $BIN_NAME_ZIPPED
-        asset_name: $BIN_NAME_ZIPPED
-        asset_content_type: application/zip
-
   build_amd64:
+    permissions: write-all
     runs-on: ubuntu-latest
     env:
         BIN_NAME: ncglpm_amd64
@@ -103,4 +55,3 @@ jobs:
         asset_path: $BIN_NAME_ZIPPED
         asset_name: $BIN_NAME_ZIPPED
         asset_content_type: application/zip
-
