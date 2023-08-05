@@ -1,6 +1,3 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: GoRelease
 
 on:
@@ -33,7 +30,7 @@ jobs:
 
     - name: version
       # description: cobra --version flags print binary name in front of version, i.e. "ncglpm binary v0.0.1"b - we need to only grab last fragment
-      run: echo "$(./${BIN_NAME} --version)" | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
+      run: ./ncglpm_arm64 --version | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
       id: version
 
     - name: release
@@ -82,7 +79,7 @@ jobs:
 
     - name: version
       # description: cobra --version flags print binary name in front of version, i.e. "ncglpm binary v0.0.1"b - we need to only grab last fragment
-      run: echo "$(./${BIN_NAME} --version)" | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
+      run: ./ncglpm_amd64 --version | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
       id: version
 
     - name: release
