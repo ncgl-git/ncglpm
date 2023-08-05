@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
         BIN_NAME: ncglpm_arm64
+        BIN_NAME_ZIPPED : ncglpm_arm64.zip
     steps:
     - uses: actions/checkout@v3
 
@@ -28,7 +29,7 @@ jobs:
       run: go test -v ./...
 
     - name: Zip
-      run: zip $BIN_NAME
+      run: zip $BIN_NAME_ZIPPED $BIN_NAME
 
     - name: version
       run: echo "::set-output name=version::$(./$(BIN_NAME) --version)"
@@ -60,6 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
         BIN_NAME: ncglpm_amd64
+        BIN_NAME_ZIPPED : ncglpm_amd64.zip
     steps:
     - uses: actions/checkout@v3
 
@@ -75,7 +77,7 @@ jobs:
       run: go test -v ./...
 
     - name: Zip
-      run: zip $BIN_NAME
+      run: zip $BIN_NAME_ZIPPED $BIN_NAME
 
     - name: version
       run: echo "::set-output name=version::$(./$(BIN_NAME) --version)"
