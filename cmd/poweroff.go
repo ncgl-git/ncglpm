@@ -18,12 +18,11 @@ var poweroffCmd = &cobra.Command{
 			if err := exec.Command("cmd", "/C", "shutdown", "/s").Run(); err != nil {
 				fmt.Println("Failed to initiate shutdown:", err)
 			}
-		case "linux", "freebsd", "netbsd", "openbsd": 
-		if err := exec.Command("cmd", "shutdown").Run(); err != nil {
-			fmt.Println("Failed to initiate shutdown:", err)
+		default: // case "linux", "freebsd", "netbsd", "openbsd": 
+			if err := exec.Command("cmd", "shutdown").Run(); err != nil {
+				fmt.Println("Failed to initiate shutdown:", err)
 		}
 		}
-
 	},
 }
 
