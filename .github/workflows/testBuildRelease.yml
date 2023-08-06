@@ -9,6 +9,7 @@ on:
 
 jobs:
   testBuildRelease:
+    permissions: write-all
     uses: ncgl-git/ncglpm/.github/workflows/_reusable_testBuildRelease.yml@main
     strategy:
       matrix:
