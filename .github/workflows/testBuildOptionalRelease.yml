@@ -29,6 +29,7 @@ jobs:
           body_path: CHANGELOG.md
 
   testBuildOptionalUpload:
+    needs: createRelease
     permissions: write-all
     uses: ncgl-git/ncglpm/.github/workflows/_reusable_testBuildOptionalUpload.yml@main
     strategy:
@@ -40,4 +41,4 @@ jobs:
       go_arch: ${{ matrix.go_arch }}
       go_version: ${{ matrix.go_version}}
       binary_prefix: 'ncglpm'
-      upload_url: '${{ jobs.createRelease.outputs.upload_url }}'
+      upload_url: '${{ needs.createRelease.outputs.upload_url }}'
