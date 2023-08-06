@@ -12,7 +12,7 @@ jobs:
     uses: ncgl-git/ncglpm/.github/workflows/_reusable_testBuildRelease.yml@main
     strategy:
       matrix:
-        go_arch: [arm64]
+        go_arch: [amd64]
         go_version: [1.18, 1.19]
 
     with:
