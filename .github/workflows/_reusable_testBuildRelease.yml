@@ -1,0 +1,87 @@
+on:
+  workflow_call:
+    inputs:
+      go_arch:
+        required: true
+        type: string
+      go_version:
+        required: true
+        type: number
+      binary_prefix:
+        required: true
+        type: string
+      release:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+
+  testBuildRelease:
+    runs-on: ubuntu-latest
+    steps:
+
+      - id: environmentVariables
+        name: environmentVariables
+        run: |
+          FP_GO_VERSION=$(echo ${{ inputs.go_version }} | tr . _) &&
+          FP_GO_BIN=${{ inputs.binary_prefix }}_${{inputs.go_arch}}_${FP_GO_VERSION} &&
+          FP_GO_BIN_ZIPPED=$FP_GO_BIN.zip &&
+
+          echo $FP_GO_VERSION &&
+          echo $FP_GO_BIN &&
+          echo $FP_GO_BIN_ZIPPED &&
+
+          echo FP_GO_BIN=$FP_GO_BIN >> $GITHUB_OUTPUT &&
+          echo FP_GO_BIN_ZIPPED=$FP_GO_BIN_ZIPPED >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v3
+
+      - id: setUpGo
+        name: setUpGo
+        uses: actions/setup-go@v3
+        with:
+          go-version: '${{ inputs.go_version }}'
+
+      - id: test
+        name: test
+        run: go test -v .
+
+      - id: build
+        name: build
+        run: env GOOS=linux GOARCH=${{ inputs.go_arch }} go build -v -o ${{ steps.environmentVariables.outputs.FP_GO_BIN }}
+
+      - id: version
+        name: version
+        if: ${{ inputs.release == true }}
+        run: ./${{ steps.environmentVariables.outputs.FP_GO_BIN }} --version | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
+
+      - id: zip
+        name: zip
+        if: steps.version.outcome == 'success'
+        run: zip ${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }} ${{ steps.environmentVariables.outputs.FP_GO_BIN }}
+
+      - id: createRelease
+        name: createRelease
+        if: steps.zip.outcome == 'success'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: '${{ github.token }}'
+        with:
+          draft: false
+          prerelease: false
+          release_name: '${{ steps.version.outputs.version }}'
+          tag_name: '${{ github.ref }}'
+          body_path: CHANGELOG.md
+
+      - id: uploadArtifact
+        name: uploadArtifact
+        if: steps.createRelease.outcome == 'success'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: '${{ github.token }}'
+        with:
+          upload_url: '${{ steps.createRelease.outputs.upload_url }}'
+          asset_path: '${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }}'
+          asset_name: '${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }}'
+          asset_content_type: application/zip
