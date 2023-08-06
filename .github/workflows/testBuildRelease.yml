@@ -3,7 +3,7 @@ name: testBuildRelease
 on:
   push:
     branches: "*"
-    tags: "v*"
+    tags: "release/v*"
   pull_request:
     branches: "*"
 
