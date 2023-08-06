@@ -1,0 +1,43 @@
+name: testBuildOptionalRelease
+
+on:
+  push:
+    branches: "*"
+    tags: "release/v*"
+  pull_request:
+    branches: "*"
+
+jobs:
+
+  createRelease:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/tags/release/v') }}
+    permissions: write-all
+    outputs: 
+      upload_url: $ {{ steps.createRelease.outputs.upload_url }}
+    steps:
+      - id: createRelease
+        name: createRelease
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: '${{ github.token }}'
+        with:
+          draft: false
+          prerelease: false
+          release_name: '${{ github.ref }}'
+          tag_name: '${{ github.ref }}'
+          body_path: CHANGELOG.md
+
+  testBuildOptionalUpload:
+    permissions: write-all
+    uses: ncgl-git/ncglpm/.github/workflows/_reusable_testBuildOptionalUpload.yml@main
+    strategy:
+      matrix:
+        go_arch: [amd64]
+        go_version: [1.18, 1.19]
+
+    with:
+      go_arch: ${{ matrix.go_arch }}
+      go_version: ${{ matrix.go_version}}
+      binary_prefix: 'ncglpm'
+      upload_url: '${{ jobs.createRelease.outputs.upload_url }}'

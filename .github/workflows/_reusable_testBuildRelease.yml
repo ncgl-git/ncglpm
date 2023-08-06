@@ -10,10 +10,9 @@ on:
       binary_prefix:
         required: true
         type: string
-      release:
+      upload_url:
         required: false
-        type: boolean
-        default: false
+        type: string
 
 jobs:
 
@@ -51,37 +50,18 @@ jobs:
         name: build
         run: env GOOS=linux GOARCH=${{ inputs.go_arch }} go build -v -o ${{ steps.environmentVariables.outputs.FP_GO_BIN }}
 
-      - id: version
-        name: version
-        if: ${{ inputs.release == true }}
-        run: ./${{ steps.environmentVariables.outputs.FP_GO_BIN }} --version | echo "version=$(awk '{print $NF}')" >> $GITHUB_OUTPUT
-
       - id: zip
         name: zip
-        if: steps.version.outcome == 'success'
         run: zip ${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }} ${{ steps.environmentVariables.outputs.FP_GO_BIN }}
-
-      - id: createRelease
-        name: createRelease
-        if: steps.zip.outcome == 'success'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: '${{ github.token }}'
-        with:
-          draft: false
-          prerelease: false
-          release_name: '${{ steps.version.outputs.version }}'
-          tag_name: '${{ github.ref }}'
-          body_path: CHANGELOG.md
 
       - id: uploadArtifact
         name: uploadArtifact
-        if: steps.createRelease.outcome == 'success'
+        if: ${{ inputs.upload_url != ''}}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: '${{ github.token }}'
         with:
-          upload_url: '${{ steps.createRelease.outputs.upload_url }}'
+          upload_url: '${{ inputs.upload_url }}'
           asset_path: '${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }}'
           asset_name: '${{ steps.environmentVariables.outputs.FP_GO_BIN_ZIPPED }}'
           asset_content_type: application/zip
