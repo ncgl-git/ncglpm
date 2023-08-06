@@ -1,0 +1,22 @@
+name: testBuildRelease
+
+on:
+  push:
+    branches: "*"
+    tags: "v*"
+  pull_request:
+    branches: "*"
+
+jobs:
+  testBuildRelease:
+    uses: ncgl-git/ncglpm/.github/workflows/_reusable_testBuildRelease.yml@main
+    strategy:
+      matrix:
+        go_arch: [arm64]
+        go_version: [1.18, 1.19]
+
+    with:
+      go_arch: ${{ matrix.go_arch }}
+      go_version: ${{ matrix.go_version}}
+      binary_prefix: 'ncglpm'
+      release: ${{ startsWith(github.ref, 'refs/tags/v') }}
