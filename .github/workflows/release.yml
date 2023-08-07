@@ -1,17 +1,13 @@
-name: testBuildOptionalRelease
+name: release
 
 on:
   push:
-    branches: "*"
     tags: "release/v*"
-  pull_request:
-    branches: "*"
 
 jobs:
 
   createRelease:
     runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/release/v') }}
     permissions: write-all
     outputs: 
       upload_url: $ {{ steps.createRelease.outputs.upload_url }}
